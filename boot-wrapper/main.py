@@ -1,8 +1,7 @@
 import requests
-import json
 from sys import argv
 
-URL = "http://localhost:3000/api/agent"
+BASE_URL = "http://localhost:3000/api"
 
 class Exceptions:
     class InvalidArgument(Exception):
@@ -14,8 +13,12 @@ class Exceptions:
 
 def main():
     try:
-        res = make_request()
-        print("\n".join(res))
+        args = argv[1:]
+
+        if not args:
+            raise Exceptions.InvalidArgument
+        res = make_post_request("agent", args)
+        print(res)
     except Exceptions.ErrorCallingAPI as e:
         print(f"Error calling API: {e}")
         exit(1)
@@ -27,19 +30,16 @@ def main():
         print(e)
         exit(1)
 
-def make_request():
+def make_post_request(endpoint, args):
     try:
-        args = argv[1:]
-
-        if not args:
-            raise Exceptions.InvalidArgument
         response = requests.post(
-            URL,
+            f"{BASE_URL}/{endpoint}",
             json={"args": args},
             headers={'Content-Type': 'application/json'}
         )
         response.raise_for_status()
-        return response.json()
+        res = response.json()
+        return "\n".join(res)
     except requests.exceptions.RequestException as e:
         raise Exceptions.ErrorCallingAPI(e)
 

@@ -1,8 +1,8 @@
+import { getFilesInfo } from "./functions/getFilesInfo";
 import { handleAgent } from "./handlers";
 
-export type Args = [string, boolean]
 type PostBody = {
-  args: Args;
+  args: Array<string>;
 }
 
 Bun.serve({
@@ -15,6 +15,21 @@ Bun.serve({
 
         return new Response(
           agentResponse,
+          {
+            headers: { "Content-Type": "application/json" },
+            status: 201
+          }
+        )
+      }
+    },
+    "/api/get_files_info": {
+      POST: async (req) => {
+        const { args } = await req.json() as PostBody;
+        const [workingDir, dir] = args;
+        const filesInfo = await getFilesInfo(workingDir, dir)
+
+        return new Response(
+          filesInfo,
           {
             headers: { "Content-Type": "application/json" },
             status: 201
