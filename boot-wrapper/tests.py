@@ -10,6 +10,12 @@ from main import make_post_request
 # print(make_post_request("fs/get_file_content", ["calculator", "/bin/cat"]))
 # print(make_post_request("fs/get_file_content", ["calculator", "pkg/does_not_exist.py"]))
 
-print(make_post_request("fs/write_file", ["calculator", "lorem.txt", "wait, this isn't lorem ipsum"]))
-print(make_post_request("fs/write_file", ["calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet"]))
-print(make_post_request("fs/write_file", ["calculator", "/tmp/temp.txt", "this should not be allowed"]))
+# print(make_post_request("fs/write_file", ["calculator", "lorem.txt", "wait, this isn't lorem ipsum"]))
+# print(make_post_request("fs/write_file", ["calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet"]))
+# print(make_post_request("fs/write_file", ["calculator", "/tmp/temp.txt", "this should not be allowed"]))
+
+print(make_post_request("fs/run_python_file", ["calculator", "main.py"]))
+print(make_post_request("fs/run_python_file", ["calculator", "main.py", ["3 + 5"]]))
+print(make_post_request("fs/run_python_file", ["calculator", "tests.py"]))
+print(make_post_request("fs/run_python_file", ["calculator", "../main.py"]))
+print(make_post_request("fs/run_python_file", ["calculator", "nonexistent.py"]))

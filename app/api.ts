@@ -1,5 +1,5 @@
 import { gemini_agent } from "./agents/gemini";
-import { getFileContent, getFilesInfo } from "./functions";
+import { getFileContent, getFilesInfo, runPythonFile } from "./functions";
 import { writeFile } from "./functions/writeFile";
 
 type PostBody = {
@@ -67,6 +67,9 @@ Bun.serve({
               break
             case "write_file":
               fsResult = await writeFile(workingDir, target, content)
+              break
+            case "run_python_file":
+              fsResult = await runPythonFile(workingDir, target, content)
               break
           }
 

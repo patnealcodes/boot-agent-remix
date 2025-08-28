@@ -18,6 +18,20 @@ export class UnexpectedTargetType extends Error {
   }
 }
 
+export class FileNotFound extends Error {
+  constructor() {
+    super();
+    this.name = "FileNotFound"
+  }
+}
+
+export class IncorrectFileType extends Error {
+  constructor() {
+    super();
+    this.name = "IncorrectFileType"
+  }
+}
+
 type TargetType = "file" | "directory" | "symlink" | "unknown"
 
 export async function getPathInfo(workingDir: string, target: string): Promise<{
