@@ -1,10 +1,10 @@
 import { readdir, stat } from "fs/promises";
-import { getTargetInfo, OutsideWorkingDirError } from "./utils";
+import { getPathInfo, OutsideWorkingDirError } from "./utils";
 
 export async function getFilesInfo(workingDir: string = ".", targetDir: string = ".") {
   try {
     const data = [];
-    const { workingDirPath, targetPath, targetType } = await getTargetInfo(workingDir, targetDir)
+    const { workingDirPath, targetPath, targetType } = await getPathInfo(workingDir, targetDir)
 
     data.push(workingDirPath === targetPath ? "Result for current directory:" : `Result for '${targetDir}' directory`)
 

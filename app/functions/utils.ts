@@ -4,13 +4,6 @@ import { resolve } from "path"
 
 const PYTHON_FOLDER_PATH = "boot-wrapper"
 
-type TargetPathInfo = {
-  workingDirPath: string;
-  targetInfo: Stats;
-  targetPath: string;
-  targetType: "file" | "directory";
-}
-
 export class OutsideWorkingDirError extends Error {
   constructor() {
     super();
@@ -18,14 +11,45 @@ export class OutsideWorkingDirError extends Error {
   }
 }
 
-export async function getTargetInfo(workingDir: string, target: string): Promise<TargetPathInfo> {
+export class UnexpectedTargetType extends Error {
+  constructor() {
+    super();
+    this.name = "UnexpectedTargetType";
+  }
+}
+
+type TargetType = "file" | "directory" | "symlink" | "unknown"
+
+export async function getPathInfo(workingDir: string, target: string): Promise<{
+  workingDirPath: string,
+  targetPath: string,
+  targetInfo: Stats | undefined,
+  targetType: TargetType
+}> {
   const workingDirPath = resolve(`${PYTHON_FOLDER_PATH}/${workingDir}`)
-  const targetPath = resolve(workingDirPath, target)
-  const targetIsChild = targetPath.startsWith(workingDirPath)
+  const targetPath = resolve(workingDirPath, target);
+  let targetInfo;
+  let targetType: TargetType = "unknown";
+
+
+  try {
+    targetInfo = await stat(targetPath)
+    if(targetInfo.isDirectory()) {
+      targetType = "directory"
+    } else if(targetInfo.isFile()) {
+      targetType = "file"
+    } else if(targetInfo.isSymbolicLink()) {
+      targetType = "symlink"
+    }
+  } catch (e) {
+    if ((e as any).code !== "ENOENT") {
+      throw new Error("Error ocurred trying to 'stat' target - but not an ENOENT")
+    }
+  }
 
   // Extra check to block potentially malicious targetDirs
   if (
-    !targetIsChild
+    !targetPath.startsWith(workingDirPath)
     || target.startsWith("~")
     || target.startsWith("/")
     || target.startsWith("~")
@@ -33,13 +57,11 @@ export async function getTargetInfo(workingDir: string, target: string): Promise
     throw new OutsideWorkingDirError();
   }
 
-  const targetInfo = await stat(targetPath)
-  const targetIsADirectory = targetInfo.isDirectory()
-
   return {
     workingDirPath,
     targetPath,
     targetInfo,
-    targetType: targetIsADirectory ? "directory" : "file"
+    targetType
   }
 }
+

@@ -1,5 +1,6 @@
 import { gemini_agent } from "./agents/gemini";
 import { getFileContent, getFilesInfo } from "./functions";
+import { writeFile } from "./functions/writeFile";
 
 type PostBody = {
   args: Array<string>;
@@ -53,7 +54,7 @@ Bun.serve({
       POST: async (req) => {
         const type = req.params.type;
         const { args } = await req.json() as PostBody;
-        const [workingDir, target] = args;
+        const [workingDir, target, content] = args;
         let fsResult;
 
         try {
@@ -63,6 +64,9 @@ Bun.serve({
               break
             case "get_file_content":
               fsResult = await getFileContent(workingDir, target)
+              break
+            case "write_file":
+              fsResult = await writeFile(workingDir, target, content)
               break
           }
 

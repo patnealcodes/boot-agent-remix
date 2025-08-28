@@ -1,10 +1,10 @@
-import { getTargetInfo, OutsideWorkingDirError } from "./utils";
+import { getPathInfo, OutsideWorkingDirError } from "./utils";
 
 const MAX_CONTENT_LENGTH = 10000;
 
 export async function getFileContent(workingDir: string = ".", filePath: string = ".") {
   try {
-    const { targetPath, targetType } = await getTargetInfo(workingDir, filePath)
+    const { targetPath, targetType } = await getPathInfo(workingDir, filePath)
 
     if (targetType === "file") {
       const responseContent = [];
