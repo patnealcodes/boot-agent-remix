@@ -1,6 +1,8 @@
 import { resolve } from "path"
 import { getFileContent } from "./getFileContent";
 import { FileNotFound, getPathInfo, IncorrectFileType, OutsideWorkingDirError, UnexpectedTargetType } from "./utils";
+import { type FunctionDeclaration } from "@google/genai";
+import { Type } from "@google/genai/node";
 
 const BOOT_PATH = resolve("./boot-wrapper");
 const PYTHON_PATH = `${BOOT_PATH}/.venv/bin/python`
@@ -53,6 +55,28 @@ export async function runPythonFile(workingDir: string = ".", filePath: string =
       return JSON.stringify([`Error: "${filePath}" is not a Python file.`])
     } else {
       return JSON.stringify([`Error: executing Python file: ${e}`])
+    }
+  }
+}
+
+export const schemaRunPythonFile: FunctionDeclaration = {
+  name: "run_python_file",
+  description: "Runs a Python file, constrained to the working directory",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      file_path: {
+        type: Type.STRING,
+        description: "The Python file to run, relative to the working directory. If not provided, runs the working directory itself."
+      },
+      args: {
+        type: Type.STRING,
+        description: "The arguments to pass to the Python file."
+      },
+      working_dir: {
+        type: Type.STRING,
+        description: "The working directory to run the Python file in, relative to the working directory. If not provided, runs the Python file in the working directory itself."
+      }
     }
   }
 }

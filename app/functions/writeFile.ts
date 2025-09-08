@@ -1,4 +1,6 @@
+import { type FunctionDeclaration } from "@google/genai";
 import { getPathInfo, OutsideWorkingDirError, UnexpectedTargetType } from "./utils";
+import { Type } from "@google/genai/node";
 
 export async function writeFile(workingDir: string = ".", fileName: string = ".", content = "") {
 
@@ -26,6 +28,24 @@ export async function writeFile(workingDir: string = ".", fileName: string = "."
       return JSON.stringify([`Error: File not found or is not a regular file: "${fileName}"`])
     } else {
       return JSON.stringify([`Error: An unexpected error ocurred - ${e}`])
+    }
+  }
+}
+
+export const schemaWriteFile: FunctionDeclaration = {
+  name: "write_file",
+  description: "Writes to a file, constrained to the working directory",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      file_path: {
+        type: Type.STRING,
+        description: "The file to write to, relative to the working directory. If not provided, writes to the working directory itself."
+      },
+      content: {
+        type: Type.STRING,
+        description: "The content to write to the file."
+      }
     }
   }
 }
