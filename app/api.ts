@@ -27,10 +27,22 @@ Bun.serve({
           const agentResponse = await gemini_agent(prompt)
 
           if (agentResponse) {
-            const { text, usageMetadata } = agentResponse;
+            const { text, functionCalls, usageMetadata } = agentResponse;
 
             if (text) {
               response.push(text)
+            }
+
+            if (functionCalls) {
+              for (const call of functionCalls) {
+                // Format arg object to look more python-y
+                // Change double quotes to single quotes
+                // Add a space between the key and the value
+                const formattedArgs = JSON.stringify(call.args)
+                  .replace(/"/g, "'")
+                  .replace(/:'/g, ": '")
+                response.push(`Calling function: ${call.name}(${formattedArgs})`)
+              }
             }
 
             if (verbose) {
@@ -40,7 +52,6 @@ Bun.serve({
             }
           }
         }
-
         return new Response(
           JSON.stringify(response),
           {
