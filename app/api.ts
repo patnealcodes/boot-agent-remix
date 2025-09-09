@@ -1,5 +1,4 @@
-import { gemini_agent } from "./agents/gemini";
-import { callFunction } from "./functions/utils";
+import { callFunction, gemini_agent } from "./agents/gemini";
 import { getFileContent, getFilesInfo, runPythonFile } from "./functions";
 import { writeFile } from "./functions/writeFile";
 
@@ -19,6 +18,9 @@ Bun.serve({
   routes: {
     "/api/agent": {
       POST: async (req) => {
+        /**
+         * TODO: MOVE THIS INTO A HELPER FUNCTION && clean up
+         */
         const { args } = await req.json() as PostBody;
         const [prompt] = args;
         const verbose = args.includes("--verbose")
@@ -29,10 +31,6 @@ Bun.serve({
 
           if (agentResponse) {
             const { text, functionCalls, usageMetadata } = agentResponse;
-
-            if (text) {
-              response.push(text)
-            }
 
             if (functionCalls) {
               for (const call of functionCalls) {
@@ -57,6 +55,8 @@ Bun.serve({
                   }
                 }
               }
+            } else {
+              response.push(text)
             }
 
             if (verbose) {
