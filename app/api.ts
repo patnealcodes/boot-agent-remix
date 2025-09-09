@@ -1,4 +1,5 @@
 import { gemini_agent } from "./agents/gemini";
+import { callFunction } from "./functions/utils";
 import { getFileContent, getFilesInfo, runPythonFile } from "./functions";
 import { writeFile } from "./functions/writeFile";
 
@@ -6,7 +7,7 @@ type PostBody = {
   args: Array<string>;
 }
 
-class NotFoundError extends Error {
+export class NotFoundError extends Error {
   constructor() {
     super();
     this.name = "NotFoundError";
@@ -35,13 +36,26 @@ Bun.serve({
 
             if (functionCalls) {
               for (const call of functionCalls) {
-                // Format arg object to look more python-y
-                // Change double quotes to single quotes
-                // Add a space between the key and the value
-                const formattedArgs = JSON.stringify(call.args)
-                  .replace(/"/g, "'")
-                  .replace(/:'/g, ": '")
-                response.push(`Calling function: ${call.name}(${formattedArgs})`)
+                try {
+                  const { logs, content } = await callFunction(call, true)
+
+                  const result = content?.parts?.[0]?.functionResponse?.response?.result as string
+
+                  if( result ) {
+                    const parsed = JSON.parse(result)
+                    console.log({parsed})
+                    response.push( ...parsed )
+                  } else {
+                    return new Response(JSON.stringify([...logs, "Error: Function call failed"]), {
+                      headers: { "Content-Type": "application/json" },
+                      status: 201
+                    })
+                  }
+                } catch (e) {
+                  if (e instanceof NotFoundError) {
+                    response.push(`Error: Function ${call.name} not found`)
+                  }
+                }
               }
             }
 
@@ -71,16 +85,16 @@ Bun.serve({
         try {
           switch (type) {
             case "get_files_info":
-              fsResult = await getFilesInfo(workingDir, target)
+              fsResult = await getFilesInfo({ workingDir, targetDir: target })
               break
             case "get_file_content":
-              fsResult = await getFileContent(workingDir, target)
+              fsResult = await getFileContent({ workingDir, filePath: target })
               break
             case "write_file":
-              fsResult = await writeFile(workingDir, target, content)
+              fsResult = await writeFile({ workingDir, filePath: target, content })
               break
             case "run_python_file":
-              fsResult = await runPythonFile(workingDir, target, content)
+              fsResult = await runPythonFile({ workingDir, filePath: target, args: content })
               break
           }
 

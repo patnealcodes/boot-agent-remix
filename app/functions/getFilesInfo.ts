@@ -2,7 +2,7 @@ import { readdir, stat } from "fs/promises";
 import { getPathInfo, OutsideWorkingDirError } from "./utils";
 import { Type, type FunctionDeclaration, type Tool } from "@google/genai";
 
-export async function getFilesInfo(workingDir: string = ".", targetDir: string = ".") {
+export async function getFilesInfo({ workingDir = ".", targetDir = "." }: { workingDir?: string, targetDir?: string }) {
   try {
     const data = [];
     const { workingDirPath, targetPath, targetType } = await getPathInfo(workingDir, targetDir)

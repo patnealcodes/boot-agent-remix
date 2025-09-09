@@ -2,11 +2,14 @@ import { type FunctionDeclaration } from "@google/genai";
 import { getPathInfo, OutsideWorkingDirError, UnexpectedTargetType } from "./utils";
 import { Type } from "@google/genai/node";
 
-export async function writeFile(workingDir: string = ".", fileName: string = ".", content = "") {
+export async function writeFile({ workingDir = ".", filePath = ".", content = "" }: { workingDir?: string, filePath?: string, content?: string }) {
+
+  console.log({ workingDir, filePath, content })
 
   try {
-    const { targetPath, targetInfo, targetType } = await getPathInfo(workingDir, fileName)
+    const { targetPath, targetInfo, targetType } = await getPathInfo(workingDir, filePath)
 
+    console.log({ targetPath, targetInfo, targetType })
 
     if (targetInfo && targetType !== "file") {
       throw new UnexpectedTargetType()
@@ -16,16 +19,16 @@ export async function writeFile(workingDir: string = ".", fileName: string = "."
       await Bun.write(targetPath, "")
     }
 
-    console.log({targetPath, targetInfo, targetType})
+    console.log({ targetPath, targetInfo, targetType })
 
     Bun.write(targetPath, content)
 
-    return JSON.stringify([`Successfully wrote to "${fileName}" (${content.length} characters written)`])
+    return JSON.stringify([`Successfully wrote to "${filePath}" (${content.length} characters written)`])
   } catch (e) {
     if (e instanceof OutsideWorkingDirError) {
-      return JSON.stringify([`Error: Cannot write to "${fileName}" as it is outside the permitted working directory`])
+      return JSON.stringify([`Error: Cannot write to "${filePath}" as it is outside the permitted working directory`])
     } else if (e instanceof UnexpectedTargetType) {
-      return JSON.stringify([`Error: File not found or is not a regular file: "${fileName}"`])
+      return JSON.stringify([`Error: File not found or is not a regular file: "${filePath}"`])
     } else {
       return JSON.stringify([`Error: An unexpected error ocurred - ${e}`])
     }
@@ -38,7 +41,7 @@ export const schemaWriteFile: FunctionDeclaration = {
   parameters: {
     type: Type.OBJECT,
     properties: {
-      file_path: {
+      filePath: {
         type: Type.STRING,
         description: "The file to write to, relative to the working directory. If not provided, writes to the working directory itself."
       },

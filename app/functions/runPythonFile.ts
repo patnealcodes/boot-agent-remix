@@ -7,12 +7,12 @@ import { Type } from "@google/genai/node";
 const BOOT_PATH = resolve("./boot-wrapper");
 const PYTHON_PATH = `${BOOT_PATH}/.venv/bin/python`
 
-export async function runPythonFile(workingDir: string = ".", filePath: string = ".", args: string = "") {
+export async function runPythonFile({ workingDir = ".", filePath = ".", args = "" }: { workingDir?: string, filePath?: string, args?: string }) {
 
   try {
     if (!filePath.endsWith(".py")) { throw new IncorrectFileType() }
 
-    const fileContent = await getFileContent(workingDir, filePath);
+    const fileContent = await getFileContent({ workingDir, filePath });
     const content = JSON.parse(fileContent).join("")
     const { workingDirPath } = await getPathInfo(workingDir, filePath)
 
@@ -22,7 +22,8 @@ export async function runPythonFile(workingDir: string = ".", filePath: string =
     const proc = Bun.spawn([PYTHON_PATH, "-c", content], {
       cwd: workingDirPath,
       stdout: "pipe",
-      stdin: "pipe"
+      stdin: "pipe",
+      stderr: "pipe"
     })
 
     const stdout = await new Response(proc.stdout).text();
@@ -65,7 +66,7 @@ export const schemaRunPythonFile: FunctionDeclaration = {
   parameters: {
     type: Type.OBJECT,
     properties: {
-      file_path: {
+      filePath: {
         type: Type.STRING,
         description: "The Python file to run, relative to the working directory. If not provided, runs the working directory itself."
       },
@@ -73,7 +74,7 @@ export const schemaRunPythonFile: FunctionDeclaration = {
         type: Type.STRING,
         description: "The arguments to pass to the Python file."
       },
-      working_dir: {
+      workingDir: {
         type: Type.STRING,
         description: "The working directory to run the Python file in, relative to the working directory. If not provided, runs the Python file in the working directory itself."
       }

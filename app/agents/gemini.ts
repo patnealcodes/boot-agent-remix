@@ -1,8 +1,9 @@
-import { GoogleGenAI, type ContentListUnion, type Tool } from "@google/genai";
+import { GoogleGenAI, type ContentListUnion, type FunctionCall, type Tool } from "@google/genai";
 import { schemaGetFilesInfo } from "../functions/getFilesInfo";
 import { schemaGetFileContent } from "../functions/getFileContent";
 import { schemaWriteFile } from "../functions/writeFile";
 import { schemaRunPythonFile } from "../functions/runPythonFile";
+import { availableFunctions } from "../functions/utils";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -18,10 +19,6 @@ When a user asks a question or makes a request, make a function call plan. You c
 - Write or overwrite files
 
 All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.`
-
-const availableFunctions: Tool = {
-  functionDeclarations: [schemaGetFilesInfo, schemaGetFileContent, schemaWriteFile, schemaRunPythonFile],
-}
 
 export async function gemini_agent(prompt: string) {
   const messages: ContentListUnion = [

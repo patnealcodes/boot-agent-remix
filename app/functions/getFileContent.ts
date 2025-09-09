@@ -4,9 +4,13 @@ import { getPathInfo, OutsideWorkingDirError } from "./utils";
 
 const MAX_CONTENT_LENGTH = 10000;
 
-export async function getFileContent(workingDir: string = ".", filePath: string = ".") {
+export async function getFileContent({ workingDir = ".", filePath = "." }: { workingDir?: string, filePath?: string }) {
+
+  console.log({ workingDir, filePath })
   try {
     const { targetPath, targetType } = await getPathInfo(workingDir, filePath)
+
+    console.log({ targetPath, targetType })
 
     if (targetType === "file") {
       const responseContent = [];
@@ -39,7 +43,7 @@ export const schemaGetFileContent: FunctionDeclaration = {
   parameters: {
     type: Type.OBJECT,
     properties: {
-      file_path: {
+      filePath: {
         type: Type.STRING,
         description: "The file to get the content of, relative to the working directory. If not provided, gets the content of the working directory itself."
       }
